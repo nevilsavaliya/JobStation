@@ -1,0 +1,7 @@
+{
+    "require": {
+        "google/apiclient": "^2.0",
+        "ext-curl": "*",
+        "php-ai/php-ml": "^0.10.0"
+    }
+}
