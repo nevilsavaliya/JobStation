@@ -18,7 +18,7 @@ if (!isset($token['error'])) {
             $sql = "SELECT id,email FROM employer WHERE email = '$email'";
             $result = $conn->query($sql);
             if ($result->num_rows <= 0) {
-                $imgContent = addslashes($picture);
+                $imgContent = addslashes(file_get_contents($picture));
                 $sql = "INSERT INTO `employer` (`name`, `email`, `password`, `image`) VALUES ('$name', '$email', '$password', '$imgContent')";
                 $conn->query($sql);
                 $sql = "SELECT id,email FROM employer WHERE email = '$email'";

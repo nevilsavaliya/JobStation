@@ -141,8 +141,7 @@ $id = $_SESSION['ID'];
                     <div class="dropdown dashboard-option">
                         <?php
                         if ($row['image']) {
-                            $result = $conn->query("SELECT image FROM employer WHERE `id` = '$id' ");
-                            $row = $result->fetch_assoc();
+                            echo '';
                             echo '
                             <a class="dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false">
                                 <img src="data:image/jpg;charset=utf8;base64,';

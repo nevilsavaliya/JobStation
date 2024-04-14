@@ -22,9 +22,19 @@ session_start();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <!--[if lt IE 9]>
+
+    <style>
+        span{
+            display:block;
+
+        }
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
     <!--[if lt IE 9]>
     <script src="js/respond.js"></script><![endif]-->
+
+    <script src="js/validation.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script>
 
@@ -43,6 +53,72 @@ session_start();
             });
         });
     </script>
+    <?php
+    if (isset($_POST['submit'])) {
+        //creating variables for error msgs, E refers to error
+        $fnE1 = $fnE2 = $emailE  = $passE1 = $passE2 = $passE3 = $passE4 = "";
+
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $pass = $_POST['pass'];
+
+    $valid = true;
+    // checking javascript is on or off
+    if ($_POST["javaScriptValid"] == 0) {
+        // first name
+        if (empty($name)) {
+            $valid = false;
+            $fnE1 = "Enter a valid name";
+        } else {
+            if (strlen($name) < 2 && strlen($name > 50)) {
+                $valid = false;
+                $fnE1 = "2-50 characters";
+            }
+            if (!ctype_alpha($name)) {
+                $valid = false;
+                $fnE2 = "Only alphabets";
+            }
+        }
+        // email
+        if (empty($email)) {
+            $valid = false;
+            $emailE = "Enter a valid email";
+        } else {
+            if (!preg_match("/^[a-z][a-z0-9]+@(gmail|outlook|hotmail|yahoo|icloud|utu)[.](com|in)$/", $email)) {
+                $valid = false;
+                $emailE = "Enter a valid email";
+            }
+        }
+
+        if (empty($pass)) {
+            $valid = false;
+            $passE1 = "Enter a valid password";
+        } else {
+            if (strlen($pass) < 8 && strlen($pass > 15)) {
+                $valid = false;
+                $passE1 = "8-15 case sensitive characters";
+            }
+            if (!preg_match("/[a-z]/", $pass)) {
+                $valid = false;
+                $passE2 = "Atleast one small alphabet";
+            }
+            if (!preg_match("/[A-Z]/", $pass)) {
+                $valid = false;
+                $passE3 = "Atleast one capital alphabet";
+            }
+            if (!preg_match("/[0-9]/", $pass)) {
+                $valid = false;
+                $passE4 = "Atleast one number";
+            }
+        }
+    }
+        if ($valid) {
+            $_SESSION["registerDetails"] = $_POST;
+
+        }
+    }
+    ?>
+
 </head>
 
 <body>
@@ -50,7 +126,7 @@ session_start();
 <div class="page-wrapper">
 
     <!-- Preloader -->
-    <!--            <div class="preloader"></div>-->
+                <div class="preloader"></div>
 
     <!-- Main Header-->
     <header class="main-header">
@@ -129,25 +205,48 @@ session_start();
                         </div>
                     </div>
                     <!--Login Form-->
-                    <form method="post">
+                    <form method="post" onsubmit="return nullCheck()">
                         <input type="hidden" class="user" name="user" value="">
                         <div class="form-group">
                             <label>Name</label>
-                            <input type="text" name="name" placeholder="Name" required>
+                            <input type="text" class="form-control" id="fn" name="name" placeholder="Name" onkeyup="fnCheck()" onfocus="fnF()" onblur="fnB()" value="<?php if (isset($_POST["name"])) echo $_POST["name"]; ?>">
+                            <span id="fnMsg1" style="display:block;"></span>
+                            <span id="fnMsg2" style="display:block;"></span>
+                            <span id="fnV"></span>
+                            <span><?php if (isset($fnE1)) echo $fnE1; ?></span>
+                            <span><?php if (isset($fnE2)) echo $fnE2; ?></span>
                         </div>
 
                         <div class="form-group">
                             <label>Email Address</label>
-                            <input type="email" name="email" placeholder="Email" required>
+                            <input type="text" class="form-control" id="email" name="email" placeholder="Email" onkeyup="emailCheck()" onfocus="emailF()" onblur="emailB()" value="<?php if (isset($_POST["email"])) echo $_POST["email"]; ?>">
+                            <span id="emailMsg" style="display:block;"></span>
+                            <span id="emailV" style="display:block;"></span>
+                            <span><?php if (isset($emailE)) echo $emailE; ?></span>
                         </div>
 
                         <div class="form-group">
                             <label>Password</label>
-                            <input id="password-field" type="password" name="pass" value="" placeholder="Password">
+                            <input type="password" class="form-control" id="pass" name="pass" placeholder="Password" onkeyup="passCheck()" onfocus="passF()" onblur="passB()" value="<?php if (isset($_POST["pass"])) echo $_POST["pass"]; ?>">
+                            <label class="text-muted pl-4">
+                                <input type="checkbox" class="form-check-input" onclick="hideShowPassword()">&ensp;
+                                Show Password
+                            </label><br>
+                            <span id="passMsg1" style="display:block;"></span>
+                            <span id="passMsg2" style="display:block;"></span>
+                            <span id="passMsg3" style="display:block;"></span>
+                            <span id="passMsg4" style="display:block;"></span>
+                            <span id="passV" style="display:block;"></span>
+                            <span><?php if (isset($passE1)) echo $passE1; ?></span>
+                            <span><?php if (isset($passE2)) echo $passE2; ?></span>
+                            <span><?php if (isset($passE3)) echo $passE3; ?></span>
+                            <span><?php if (isset($passE4)) echo $passE4; ?></span>
                         </div>
                         <?php
                         include 'Signup_Module.php';
                         ?>
+                        <!-- hidden field for checking javascript is on or off -->
+                        <input type="hidden" name="javaScriptValid" id="jsValid" value="0" />
                         <div class="form-group">
                             <button class="theme-btn btn-style-one submit" type="submit" name="submit" disabled="true">
                                 Register

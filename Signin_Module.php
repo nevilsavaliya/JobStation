@@ -8,13 +8,32 @@ if (isset($_POST['submit'])) {
     if ($email == "Admin@gmail.com" && $pass == "Admin@123") {
         echo "<script>window.location.href = 'dashboard/admin/dashboard.php'</script>";
     } else {
-        $user = $_POST["user"];
+        $user = $_POSfT["user"];
         $sql = "SELECT * FROM `$user` WHERE email='$email'";
         $result = $conn->query($sql);
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
+            $password = $row["password"];
+            $key = $row["ekey"];
+            function decryptAES($encryptedData, $key) {
+                $cipher = "aes-256-gcm";
+                $decodedData = base64_decode($encryptedData);
+
+                // Extract IV, ciphertext, and tag from the combined data
+                $iv = substr($decodedData, 0, openssl_cipher_iv_length($cipher));
+                $ciphertext = substr($decodedData, openssl_cipher_iv_length($cipher), -$tagLength = 16);
+                $tag = substr($decodedData, -$tagLength);
+
+                // Perform decryption
+                $plaintext = openssl_decrypt($ciphertext, $cipher, $key, OPENSSL_RAW_DATA, $iv, $tag);
+
+                echo "<script>alert('$plaintext')</script>";
+
+                return $plaintext;
+            }
+            $password = decryptAES($password, $key);
             if (!isset($row['bantime'])) {
-                if ($pass == $row["password"]) {
+                if ($pass == $password) {
                     $_SESSION['ID'] = $row["id"];
                     $_SESSION['USER'] = $user;
                     $conn->close();

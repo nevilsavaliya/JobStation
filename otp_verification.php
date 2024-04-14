@@ -75,12 +75,32 @@ session_start();
                     </div>
                     <?php
                     if (isset($_POST['verification'])) {
+                        function encryptAES($plaintext, $key, $iv): string
+                        {
+                            $cipher = "aes-256-gcm";
+                            $tag = "";
+                            $ciphertext = openssl_encrypt($plaintext, $cipher, $key, OPENSSL_RAW_DATA, $iv, $tag);
+
+                            // Combine IV, ciphertext, and tag for storage or transmission
+                            $encryptedData = $iv . $ciphertext . $tag;
+
+                            return base64_encode($encryptedData);
+                        }
+                        function generateRandomKey($length = 32): string
+                        {
+                            $randomKey = bin2hex(random_bytes($length));
+
+                            return $randomKey;
+                        }
+                        $key = generateRandomKey();
+                        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length("aes-256-gcm"));
                         include 'Connection_Module.php';
                         $name = $_SESSION['name'];
                         $pass = $_SESSION['pass'];
                         $user = $_SESSION['user'];
                         $email = $_SESSION['email'];
                         $verify = $_POST['verification'];
+                        $pass = encryptAES($pass, $key,$iv);
                         $sql = "SELECT `otp` FROM `email_verification` WHERE `email` = '$email'";
                         $result = $conn->query($sql);
                         $otp = array();
@@ -89,11 +109,11 @@ session_start();
                         }
                         if (in_array($verify, $otp)) {
                             if ($user == 'jobseeker') {
-                                $sql = "INSERT INTO `jobseeker`(`name`, `email`, `password`) VALUES ('$name','$email','$pass')";
+                                $sql = "INSERT INTO `jobseeker`(`name`, `email`, `password`,`ekey`) VALUES ('$name','$email','$pass','$key')";
                                 $conn->query($sql);
                                 $sql = "SELECT `id` FROM `jobseeker` where `email` = '$email'";
                             } else {
-                                $sql = "INSERT INTO `employer`(`name`, `email`, `password`) VALUES ('$name','$email','$pass')";
+                                $sql = "INSERT INTO `employer`(`name`, `email`, `password`,'ekey') VALUES ('$name','$email','$pass','$key')";
                                 $conn->query($sql);
                                 $sql = "SELECT `id` FROM `employer` where `email` = '$email'";
                             }

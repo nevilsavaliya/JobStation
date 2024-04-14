@@ -25,6 +25,7 @@ session_start();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script><![endif]-->
     <!--[if lt IE 9]>
     <script src="js/respond.js"></script><![endif]-->
+    <script src="js/validation.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script>
 
@@ -53,6 +54,59 @@ session_start();
             });
         });
     </script>
+    <?php
+    if (isset($_POST['submit'])) {
+        $lEmailE = $passE = $lPassE1 = $lPassE2 = $lPassE3 = $lPassE4 = "";
+
+        $email = $_POST['email'];
+        $pass = $_POST['pass'];
+    $valid = true;
+    // checking javascript is on or off
+    if ($_POST["javaScriptValid"] == 0) {
+        if (empty($email)) {
+			$valid = false;
+			$lEmailE = "Enter a valid email";
+		} else if (!preg_match("/[a-z][a-z0-9]+@(gmail|outlook|hotmail|yahoo|icloud|utu)[.](com|in)/", $email)) {
+			$valid = false;
+			$lEmailE = "Enter a valid email";
+		}
+
+		// password
+		if (empty($pass)) {
+			$valid = false;
+			$lPassE1 = "Enter a valid password";
+		} else {
+			if (strlen($pass) < 8 && strlen($pass > 15)) {
+				$valid = false;
+				$lPassE1 = "8-15 case sensitive characters";
+			}
+			if (!preg_match("/[a-z]/", $pass)) {
+				$valid = false;
+				$lPassE2 = "Atleast one small alphabet";
+			}
+			if (!preg_match("/[A-Z]/", $pass)) {
+				$valid = false;
+				$lPassE3 = "Atleast one capital alphabet";
+			}
+			if (!preg_match("/[0-9]/", $pass)) {
+				$valid = false;
+				$lPassE4 = "Atleast one number";
+			}
+		}
+	}
+	if ($valid) {
+		$_SESSION["loginDetails"] = $_POST;
+		$_SESSION["loginDetails"] = $_POST;
+		// checkUserExist();
+		// include '../PHPMailer/MailOtp.php';
+		// $otp = rand(100000, 999999);
+		// sendLoginMail($email, $otp);
+        }
+
+
+    }
+    ?>
+
 </head>
 
 <body>
@@ -126,18 +180,23 @@ session_start();
                         </div>
                     </div>
                     <!--Login Form-->
-                    <form method="post">
+                    <form method="post" onsubmit="return loginNullCheck()">
                         <input type="hidden" class="user" name="user" value="">
                         <div class="form-group">
                             <label for="email-field">Email</label>
-                            <input id="email-field" type="text" name="email" placeholder="Email" maxlength="40"
-                                   required>
+                            <input type="text" class="form-control form-control-lg" id="lEmail" placeholder="Email" onkeyup="loginEmailCheck()" name="email" value="<?php if (isset($_COOKIE['ckEmail'])) echo $_COOKIE['ckEmail']; ?>">
+                            <span id="lEmailV"></span>
+                            <span><?php if (isset($lEmailE)) echo $lEmailE; ?></span>
                         </div>
 
                         <div class="form-group">
                             <label for="password-field">Password</label>
-                            <input id="password-field" type="password" name="pass" value="" placeholder="Password"
-                                   maxlength="20" required>
+                            <input type="password" class="form-control form-control-lg" id="lPass" placeholder="Password" onkeyup="loginPassCheck()" maxlength="8" name="pass" value="<?php if (isset($_COOKIE['ckPass'])) echo $_COOKIE['ckPass']; ?>">
+                            <span id="lPassV"></span>
+<!--                            <span>--><?php //if (isset($lPassE1)) echo $lPassE1; ?><!--</span>-->
+<!--                            <span>--><?php //if (isset($lPassE2)) echo $lPassE2; ?><!--</span>-->
+<!--                            <span>--><?php //if (isset($lPassE3)) echo $lPassE3; ?><!--</span>-->
+<!--                            <span>--><?php //if (isset($lPassE4)) echo $lPassE4; ?><!--</span>-->
                         </div>
 
                         <div class="form-group">
@@ -157,11 +216,13 @@ session_start();
                                     include 'Signin_Module.php';
                                     ?>
                                 </span>
-
+                        <!-- hidden field for checking javascript is on or off -->
+                        <input type="hidden" name="javaScriptValid" id="jsValid" value="0" />
                         <div class="form-group">
                             <button class="theme-btn btn-style-one submit" type="submit" name="submit" disabled>Log In
                             </button>
                         </div>
+
                     </form>
 
                     <div class="bottom-box">
