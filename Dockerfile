@@ -1,9 +1,9 @@
 FROM php:8.2-apache
 
-# Enable Apache rewrite module
+# Enable Apache modules
 RUN a2enmod rewrite
 
-# Install system packages for PHP + Python + OpenCV + Face Recognition
+# Install system packages and dependencies
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -22,26 +22,27 @@ RUN apt-get update && apt-get install -y \
     git \
     libgl1-mesa-glx \
     libgl1 \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# ✅ Install PHP mysqli extension
 RUN docker-php-ext-install mysqli
 
-# Install Python dependencies
+# ✅ Install dlib before face_recognition
 RUN pip3 install --no-cache-dir \
-    face_recognition \
-    opencv-python \
     numpy \
+    dlib==19.24.0 \
+    opencv-python \
     Pillow \
-    mysql-connector-python
+    mysql-connector-python \
+    face_recognition
 
 # Copy project files into Apache root
 COPY . /var/www/html/
 
-# Allow .htaccess override in Apache
+# Allow .htaccess override
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Set working directory
 WORKDIR /var/www/html/
 
-# Expose Apache
 EXPOSE 80
