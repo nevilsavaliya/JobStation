@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# ✅ Install mysqli extension for PHP
 RUN docker-php-ext-install mysqli
 
 # Install Python dependencies
